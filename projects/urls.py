@@ -12,5 +12,12 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/messages/<int:message_id>/status/', views.update_message_status, name='update_message_status'),
     path('dashboard/messages/<int:message_id>/notes/', views.update_admin_notes, name='update_admin_notes'),
+    # Project management
+    path('dashboard/projects/', views.dashboard_projects, name='dashboard_projects'),
+    path('dashboard/projects/add/', views.dashboard_project_add, name='dashboard_project_add'),
+    path('dashboard/projects/<int:project_id>/edit/', views.dashboard_project_edit, name='dashboard_project_edit'),
+    path('dashboard/projects/<int:project_id>/delete/', views.dashboard_project_delete, name='dashboard_project_delete'),
+    path('dashboard/projects/<int:project_id>/screenshots/<int:screenshot_id>/delete/', views.dashboard_screenshot_delete, name='dashboard_screenshot_delete'),
+    path('dashboard/projects/<int:project_id>/features/<int:feature_id>/delete/', views.dashboard_feature_delete, name='dashboard_feature_delete'),
     path('robots.txt', views.robots_txt, name='robots_txt'),
 ]

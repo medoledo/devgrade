@@ -3,10 +3,10 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.core.paginator import Paginator
 from .models import Project, Category, TechStack, Message, SiteConfig
-from .forms import MessageForm, ContactForm
+from .forms import MessageForm, ContactForm, ProjectForm
 
 
 def site_config(request):
@@ -169,7 +169,7 @@ def dashboard(request):
     new_messages = Message.objects.filter(status='new').count()
     total_messages = Message.objects.count()
     total_projects = Project.objects.filter(is_published=True).count()
-    total_views = Project.objects.aggregate(total=models.Sum('views_count'))['total'] or 0
+    total_views = Project.objects.aggregate(total=Sum('views_count'))['total'] or 0
     
     status_filter = request.GET.get('status', '')
     messages_qs = Message.objects.select_related('project').all()
@@ -242,3 +242,121 @@ def robots_txt(request):
         "Sitemap: {}/sitemap.xml".format(request.build_absolute_uri('/')[:-1]),
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+# Dashboard Project Management
+@staff_member_required
+def dashboard_projects(request):
+    projects_qs = Project.objects.select_related('category').prefetch_related('tech_stack').all()
+    query = request.GET.get('q', '')
+    if query:
+        projects_qs = projects_qs.filter(
+            Q(title__icontains=query) | Q(short_description__icontains=query)
+        )
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'published':
+        projects_qs = projects_qs.filter(is_published=True)
+    elif status_filter == 'draft':
+        projects_qs = projects_qs.filter(is_published=False)
+    elif status_filter == 'featured':
+        projects_qs = projects_qs.filter(is_featured=True)
+
+    paginator = Paginator(projects_qs.order_by('-created_at'), 20)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    context = {
+        'projects_list': page_obj,
+        'query': query,
+        'status_filter': status_filter,
+        'page_title': 'Projects | DevGrade Dashboard',
+    }
+    return render(request, 'dashboard/projects_list.html', context)
+
+
+@staff_member_required
+def dashboard_project_add(request):
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save()
+            # Handle screenshots
+            for f in request.FILES.getlist('screenshots'):
+                project.screenshots.create(image=f)
+            # Handle features
+            features_text = request.POST.get('features', '').strip()
+            if features_text:
+                for feat in features_text.split('\n'):
+                    feat = feat.strip()
+                    if feat:
+                        project.features.create(feature=feat)
+            messages.success(request, 'Project created successfully!')
+            return redirect('dashboard_projects')
+    else:
+        form = ProjectForm()
+
+    context = {
+        'form': form,
+        'tech_stacks': TechStack.objects.all(),
+        'page_title': 'Add Project | DevGrade Dashboard',
+    }
+    return render(request, 'dashboard/project_form.html', context)
+
+
+@staff_member_required
+def dashboard_project_edit(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, request.FILES, instance=project)
+        if form.is_valid():
+            project = form.save()
+            # Handle new screenshots
+            for f in request.FILES.getlist('screenshots'):
+                project.screenshots.create(image=f)
+            # Handle new features
+            features_text = request.POST.get('features', '').strip()
+            if features_text:
+                for feat in features_text.split('\n'):
+                    feat = feat.strip()
+                    if feat:
+                        project.features.create(feature=feat)
+            messages.success(request, 'Project updated successfully!')
+            return redirect('dashboard_projects')
+    else:
+        form = ProjectForm(instance=project)
+
+    context = {
+        'form': form,
+        'project': project,
+        'tech_stacks': TechStack.objects.all(),
+        'page_title': f'Edit {project.title} | DevGrade Dashboard',
+    }
+    return render(request, 'dashboard/project_form.html', context)
+
+
+@staff_member_required
+@require_POST
+def dashboard_project_delete(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    project.delete()
+    messages.success(request, 'Project deleted successfully!')
+    return redirect('dashboard_projects')
+
+
+@staff_member_required
+@require_POST
+def dashboard_screenshot_delete(request, project_id, screenshot_id):
+    project = get_object_or_404(Project, id=project_id)
+    screenshot = get_object_or_404(project.screenshots, id=screenshot_id)
+    screenshot.delete()
+    messages.success(request, 'Screenshot deleted!')
+    return redirect('dashboard_project_edit', project_id=project.id)
+
+
+@staff_member_required
+@require_POST
+def dashboard_feature_delete(request, project_id, feature_id):
+    project = get_object_or_404(Project, id=project_id)
+    feature = get_object_or_404(project.features, id=feature_id)
+    feature.delete()
+    messages.success(request, 'Feature deleted!')
+    return redirect('dashboard_project_edit', project_id=project.id)

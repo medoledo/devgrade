@@ -25,20 +25,20 @@ class ProjectAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     inlines = [ProjectScreenshotInline, ProjectFeatureInline]
     fieldsets = (
-        ('المعلومات الأساسية', {
+        ('Basic Information', {
             'fields': ('title', 'slug', 'category', 'short_description', 'full_description', 'thumbnail')
         }),
-        ('الأسعار والروابط', {
+        ('Pricing & Links', {
             'fields': ('standard_price', 'custom_price', 'gumroad_standard_url', 'demo_url', 'documentation_url')
         }),
-        ('التقنيات والتصنيف', {
+        ('Tech & Classification', {
             'fields': ('tech_stack', 'is_featured', 'is_published', 'order')
         }),
         ('SEO', {
             'fields': ('page_title', 'meta_description', 'meta_keywords'),
             'classes': ('collapse',)
         }),
-        ('الإحصائيات', {
+        ('Statistics', {
             'fields': ('views_count', 'sales_count'),
             'classes': ('collapse',)
         }),
@@ -53,16 +53,16 @@ class MessageAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     readonly_fields = ['created_at', 'updated_at']
     fieldsets = (
-        ('بيانات التواصل', {
+        ('Contact Info', {
             'fields': ('name', 'email', 'phone')
         }),
-        ('تفاصيل الطلب', {
+        ('Order Details', {
             'fields': ('inquiry_type', 'project', 'project_details', 'expected_budget', 'delivery_date', 'subject', 'message_text')
         }),
-        ('إدارة', {
+        ('Management', {
             'fields': ('status', 'admin_notes')
         }),
-        ('التواريخ', {
+        ('Dates', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
@@ -81,7 +81,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
     def project_count(self, obj):
         return obj.projects.filter(is_published=True).count()
-    project_count.short_description = 'المشاريع المنشورة'
+    project_count.short_description = 'Published Projects'
 
 
 @admin.register(TechStack)
@@ -92,22 +92,22 @@ class TechStackAdmin(admin.ModelAdmin):
 
     def project_count(self, obj):
         return obj.projects.filter(is_published=True).count()
-    project_count.short_description = 'المشاريع'
+    project_count.short_description = 'Projects'
 
 
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('معلومات الموقع', {
+        ('Site Info', {
             'fields': ('site_name', 'tagline', 'footer_text')
         }),
-        ('SEO الافتراضي', {
+        ('Default SEO', {
             'fields': ('meta_description', 'meta_keywords')
         }),
-        ('التواصل', {
+        ('Contact', {
             'fields': ('contact_email', 'contact_phone')
         }),
-        ('التحليلات', {
+        ('Analytics', {
             'fields': ('analytics_code',),
             'classes': ('collapse',)
         }),
