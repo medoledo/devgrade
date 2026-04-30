@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ page_title|default:site_config.tagline }}{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/devlogos.svg' %}">
     <meta name="description" content="{% block meta_description %}{{ meta_description|default:site_config.meta_description }}{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}{{ meta_keywords|default:site_config.meta_keywords }}{% endblock %}">
     <link rel="canonical" href="{% block canonical %}{{ canonical_url|default:request.build_absolute_uri }}{% endblock %}">
