@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q, Sum
@@ -163,7 +165,23 @@ def contact(request):
     return render(request, 'pages/contact.html', context)
 
 
-@staff_member_required
+def admin_login(request):
+    """Custom admin login page"""
+    if request.user.is_staff:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.is_staff:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid credentials or you do not have admin access.')
+    return render(request, 'dashboard/login.html', {'page_title': 'Admin Login | DevGrade'})
+
+
+@staff_member_required(login_url='admin_login')
 def dashboard(request):
     """Site owner dashboard"""
     new_messages = Message.objects.filter(status='new').count()
@@ -204,7 +222,7 @@ def dashboard(request):
     return render(request, 'dashboard/dashboard.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 @require_POST
 def update_message_status(request, message_id):
     """HTMX endpoint to update message status"""
@@ -221,7 +239,7 @@ def update_message_status(request, message_id):
     return redirect('dashboard')
 
 
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 @require_POST
 def update_admin_notes(request, message_id):
     """HTMX endpoint to update admin notes"""
@@ -245,7 +263,7 @@ def robots_txt(request):
 
 
 # Dashboard Project Management
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 def dashboard_projects(request):
     projects_qs = Project.objects.select_related('category').prefetch_related('tech_stack').all()
     query = request.GET.get('q', '')
@@ -273,7 +291,7 @@ def dashboard_projects(request):
     return render(request, 'dashboard/projects_list.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 def dashboard_project_add(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES)
@@ -302,7 +320,7 @@ def dashboard_project_add(request):
     return render(request, 'dashboard/project_form.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 def dashboard_project_edit(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     if request.method == 'POST':
@@ -333,7 +351,7 @@ def dashboard_project_edit(request, project_id):
     return render(request, 'dashboard/project_form.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 @require_POST
 def dashboard_project_delete(request, project_id):
     project = get_object_or_404(Project, id=project_id)
@@ -342,7 +360,7 @@ def dashboard_project_delete(request, project_id):
     return redirect('dashboard_projects')
 
 
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 @require_POST
 def dashboard_screenshot_delete(request, project_id, screenshot_id):
     project = get_object_or_404(Project, id=project_id)
@@ -352,7 +370,7 @@ def dashboard_screenshot_delete(request, project_id, screenshot_id):
     return redirect('dashboard_project_edit', project_id=project.id)
 
 
-@staff_member_required
+@staff_member_required(login_url='admin_login')
 @require_POST
 def dashboard_feature_delete(request, project_id, feature_id):
     project = get_object_or_404(Project, id=project_id)
