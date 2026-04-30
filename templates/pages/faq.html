@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="bg-dark-900 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h1>
+        <p class="text-gray-400 text-lg max-w-2xl">Everything you need to know about buying projects, custom orders, and getting started.</p>
+    </div>
+</section>
+
+<section class="py-16 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="space-y-6">
+            <!-- FAQ Item 1 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">What exactly do I get when I buy a project?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    You get a complete ZIP file containing the full Django project source code, a detailed README with setup instructions, a database schema diagram, pre-configured admin panel, sample data, and a deployment guide for VPS or PythonAnywhere.
+                </div>
+            </div>
+            
+            <!-- FAQ Item 2 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">Can I submit this as my own final year project?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    Yes, the project becomes yours after purchase. We recommend customizing the branding, adding your university name, and modifying a few features to match your specific requirements. The code is a solid foundation — make it your own.
+                </div>
+            </div>
+            
+            <!-- FAQ Item 3 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">Do you offer refunds?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    Because you receive the full source code instantly, we do not offer refunds on standard downloads. However, if you purchase a custom build and I haven't started work yet, you can request a full refund within 24 hours of payment.
+                </div>
+            </div>
+            
+            <!-- FAQ Item 4 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">How does the custom order process work?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    You fill out the custom order form with your requirements, budget, and deadline. I'll review it within 24 hours and get back to you with a confirmation, timeline, and payment link. Once payment is complete, I'll build the project and deliver it by the agreed date.
+                </div>
+            </div>
+            
+            <!-- FAQ Item 5 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">What tech stack do you use?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    All projects are built with Django and Python. The frontend uses HTML, Tailwind CSS, and vanilla JavaScript. Databases are typically SQLite for simplicity or PostgreSQL for larger projects. Every project is deployable to any standard VPS or PythonAnywhere.
+                </div>
+            </div>
+            
+            <!-- FAQ Item 6 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">Do I need to know how to code to use these projects?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    Basic familiarity with Python and Django helps, but our documentation is written for beginners. If you can follow step-by-step instructions, you can get the project running. For non-technical users, we recommend the custom build option where I handle everything.
+                </div>
+            </div>
+            
+            <!-- FAQ Item 7 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">Can I see a demo before buying?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    Absolutely. Every project listing includes screenshots and a live demo link where you can interact with the actual application before making a purchase decision.
+                </div>
+            </div>
+            
+            <!-- FAQ Item 8 -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                <button class="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')">
+                    <span class="font-semibold text-dark-900">How long does a custom build take?</span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div class="hidden px-6 pb-5 text-gray-600 leading-relaxed">
+                    Most custom builds are delivered within 3-7 days depending on complexity. Urgent requests (under 48 hours) may incur a rush fee. I'll always confirm the timeline before you pay.
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-center bg-primary-50 rounded-xl p-8 border border-primary-100">
+            <h3 class="text-xl font-bold text-dark-900 mb-2">Still have questions?</h3>
+            <p class="text-gray-600 mb-4">I'm happy to help. Reach out and I'll get back to you within 24 hours.</p>
+            <a href="{% url 'contact' %}" class="inline-flex items-center justify-center bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-8 rounded-lg transition">
+                Contact Support
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

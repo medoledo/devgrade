@@ -1,0 +1,68 @@
+{% load humanize %}
+<div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for project in projects %}
+    <article class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden group flex flex-col">
+        <a href="{% url 'project_detail' project.slug %}" class="block relative overflow-hidden">
+            {% if project.thumbnail %}
+            <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+            {% else %}
+            <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-400 text-sm">No image</span>
+            </div>
+            {% endif %}
+            {% if project.is_featured %}
+            <span class="absolute top-3 left-3 bg-primary-500 text-white text-xs font-bold px-2 py-1 rounded">FEATURED</span>
+            {% endif %}
+        </a>
+        <div class="p-6 flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-primary-600 uppercase tracking-wider">{{ project.category.name|default:"Uncategorized" }}</span>
+                <div class="flex items-center text-gray-400 text-xs">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    {{ project.views_count|intcomma }}
+                </div>
+            </div>
+            <h3 class="text-lg font-bold text-dark-900 mb-2 group-hover:text-primary-600 transition">
+                <a href="{% url 'project_detail' project.slug %}">{{ project.title }}</a>
+            </h3>
+            <p class="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">{{ project.short_description }}</p>
+            
+            {% if project.tech_stack.all %}
+            <div class="flex flex-wrap gap-2 mb-4">
+                {% for tech in project.tech_stack.all|slice:":3" %}
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{{ tech.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div>
+                    <span class="text-2xl font-bold text-dark-900">${{ project.standard_price|floatformat:0 }}</span>
+                    {% if project.custom_price %}
+                    <span class="text-xs text-gray-400 ml-1">Custom: ${{ project.custom_price|floatformat:0 }}</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'project_detail' project.slug %}" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold text-sm transition">
+                    View Details
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    <div class="col-span-full text-center py-16">
+        <div class="text-gray-400 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">No projects found</h3>
+        <p class="text-gray-500">Check back soon or browse all categories.</p>
+    </div>
+    {% endfor %}
+</div>

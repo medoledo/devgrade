@@ -17,7 +17,7 @@ class ProjectFeatureInline(admin.TabularInline):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['title', 'category', 'standard_price', 'custom_price', 'is_featured', 'is_published', 'views_count', 'sales_count', 'created_at']
+    list_display = ['title', 'category', 'standard_price', 'custom_price', 'is_featured', 'is_published', 'order', 'views_count', 'sales_count', 'created_at']
     list_filter = ['is_published', 'is_featured', 'category', 'tech_stack', 'created_at']
     search_fields = ['title', 'short_description', 'full_description', 'slug']
     prepopulated_fields = {'slug': ('title',)}
