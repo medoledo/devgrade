@@ -9,27 +9,27 @@ class MessageForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'Your full name',
+                'placeholder': 'اكتب اسمك بالكامل',
                 'required': True,
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'your@email.com',
+                'placeholder': 'example@email.com',
                 'required': True,
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': '+20 123 456 7890',
+                'placeholder': 'مثلاً: 01xxxxxxxxx',
             }),
             'project_details': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'Describe your project requirements, features needed, university name, etc.',
+                'placeholder': 'اشرحلي بالتفصيل اللي عايزه: إيه المميزات المطلوبة، اسم الجامعة، التخصص، إلخ...',
                 'rows': 5,
                 'required': True,
             }),
             'expected_budget': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'e.g. $50 - $100',
+                'placeholder': 'مثلاً: 2000 - 3000 جنيه',
             }),
             'delivery_date': forms.DateInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
@@ -58,26 +58,26 @@ class ContactForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'Your full name',
+                'placeholder': 'اكتب اسمك بالكامل',
                 'required': True,
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'your@email.com',
+                'placeholder': 'example@email.com',
                 'required': True,
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': '+20 123 456 7890',
+                'placeholder': 'مثلاً: 01xxxxxxxxx',
             }),
             'subject': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'What is this about?',
+                'placeholder': 'الموضوع بتاعك إيه؟',
                 'required': True,
             }),
             'message_text': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'Your message...',
+                'placeholder': 'اكتب رسالتك هنا...',
                 'rows': 5,
                 'required': True,
             }),

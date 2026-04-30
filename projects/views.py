@@ -17,14 +17,11 @@ def site_config(request):
 def home(request):
     featured = Project.objects.filter(is_featured=True, is_published=True).select_related('category').prefetch_related('tech_stack')[:3]
     latest = Project.objects.filter(is_published=True).select_related('category').prefetch_related('tech_stack').order_by('-created_at')[:6]
-    categories = Category.objects.annotate(project_count=Count('projects', filter=Q(projects__is_published=True)))
     total_projects = Project.objects.filter(is_published=True).count()
     
-    # Increment view for analytics (home page)
     context = {
         'featured': featured,
         'latest': latest,
-        'categories': categories,
         'total_projects': total_projects,
         'page_title': SiteConfig.load().tagline,
         'meta_description': SiteConfig.load().meta_description,
@@ -64,8 +61,8 @@ def project_list(request):
         'categories': categories,
         'active_category': active_category,
         'query': query or '',
-        'page_title': 'All Projects | DevGrade',
-        'meta_description': 'Browse ready-made Django projects for your final year. Hospital, library, e-commerce, inventory systems and more.',
+        'page_title': 'كل المشاريع | DevGrade',
+        'meta_description': 'تصفح مشاريع Django الجاهزة لمشروع التخرج. مشاريع مستشفيات، مكتبات، متاجر، مخازن، وأكتر.',
         'canonical_url': request.build_absolute_uri(),
     }
     return render(request, 'projects/project_list.html', context)
@@ -106,10 +103,10 @@ def submit_message(request, slug=None):
             form.save()
             if request.headers.get('HX-Request'):
                 return render(request, 'partials/_alert.html', {
-                    'message': 'Your request has been submitted! We will contact you within 24 hours.',
+                    'message': 'تم إرسال طلبك! هتواصل معاك في أقل من 24 ساعة.',
                     'type': 'success',
                 })
-            messages.success(request, 'Your request has been submitted! We will contact you within 24 hours.')
+            messages.success(request, 'تم إرسال طلبك! هتواصل معاك في أقل من 24 ساعة.')
             if project:
                 return redirect('project_detail', slug=project.slug)
             return redirect('contact')
@@ -122,7 +119,6 @@ def submit_message(request, slug=None):
     else:
         form = MessageForm(project=project)
     
-    # If not HTMX, redirect to project detail or contact
     if project:
         return redirect('project_detail', slug=project.slug)
     return redirect('contact')
@@ -131,8 +127,8 @@ def submit_message(request, slug=None):
 def about(request):
     total_projects = Project.objects.filter(is_published=True).count()
     context = {
-        'page_title': 'About DevGrade | University Project Marketplace',
-        'meta_description': 'DevGrade provides ready-made Django projects for university students globally. Built by a software engineer who understands your needs.',
+        'page_title': 'عن DevGrade | سوق مشاريع الجامعة',
+        'meta_description': 'DevGrade بيوفر مشاريع Django جاهزة لطلاب الجامعات. شغل مبني بواسطة مهندس برمجيات فاهم إنت عايز إيه.',
         'canonical_url': request.build_absolute_uri(),
         'total_projects': total_projects,
     }
@@ -141,8 +137,8 @@ def about(request):
 
 def faq(request):
     context = {
-        'page_title': 'FAQ | DevGrade',
-        'meta_description': 'Frequently asked questions about buying Django projects, custom orders, delivery, and support.',
+        'page_title': 'الأسئلة الشائعة | DevGrade',
+        'meta_description': 'أكتر الأسئلة اللي بتتسأل عن شراء المشاريع، الطلبات المخصصة، التسليم، والدعم.',
         'canonical_url': request.build_absolute_uri(),
     }
     return render(request, 'pages/faq.html', context)
@@ -153,15 +149,15 @@ def contact(request):
         form = ContactForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Thank you for reaching out! We will get back to you soon.')
+            messages.success(request, 'شكراً لتواصلك! هرد عليك في أقرب وقت.')
             return redirect('contact')
     else:
         form = ContactForm()
     
     context = {
         'form': form,
-        'page_title': 'Contact Us | DevGrade',
-        'meta_description': 'Get in touch with DevGrade for custom Django projects or general inquiries.',
+        'page_title': 'تواصل معايا | DevGrade',
+        'meta_description': 'تواصل مع DevGrade لطلب مشروع Django مخصص أو أي استفسار.',
         'canonical_url': request.build_absolute_uri(),
     }
     return render(request, 'pages/contact.html', context)
@@ -170,13 +166,11 @@ def contact(request):
 @staff_member_required
 def dashboard(request):
     """Site owner dashboard"""
-    # Stats
     new_messages = Message.objects.filter(status='new').count()
     total_messages = Message.objects.count()
     total_projects = Project.objects.filter(is_published=True).count()
     total_views = Project.objects.aggregate(total=models.Sum('views_count'))['total'] or 0
     
-    # Messages with filters
     status_filter = request.GET.get('status', '')
     messages_qs = Message.objects.select_related('project').all()
     if status_filter:
@@ -205,7 +199,7 @@ def dashboard(request):
         'status_filter': status_filter,
         'search': search,
         'status_choices': Message.STATUS_CHOICES,
-        'page_title': 'Dashboard | DevGrade',
+        'page_title': 'لوحة التحكم | DevGrade',
     }
     return render(request, 'dashboard/dashboard.html', context)
 

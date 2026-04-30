@@ -26,7 +26,7 @@
         "@type": "Offer",
         "url": "{{ canonical_url }}",
         "price": "{{ project.standard_price }}",
-        "priceCurrency": "USD",
+        "priceCurrency": "EGP",
         "availability": "https://schema.org/InStock"
     }
 }
@@ -38,9 +38,9 @@
 <div class="bg-gray-50 border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav class="flex text-sm text-gray-500">
-            <a href="{% url 'home' %}" class="hover:text-primary-600 transition">Home</a>
+            <a href="{% url 'home' %}" class="hover:text-primary-600 transition">الرئيسية</a>
             <span class="mx-2">/</span>
-            <a href="{% url 'project_list' %}" class="hover:text-primary-600 transition">Projects</a>
+            <a href="{% url 'project_list' %}" class="hover:text-primary-600 transition">المشاريع</a>
             {% if project.category %}
             <span class="mx-2">/</span>
             <a href="{% url 'project_list' %}?category={{ project.category.slug }}" class="hover:text-primary-600 transition">{{ project.category.name }}</a>
@@ -66,7 +66,7 @@
                 <!-- Screenshots Gallery -->
                 {% if project.screenshots.all %}
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-dark-900 mb-4">Screenshots</h3>
+                    <h3 class="text-lg font-semibold text-dark-900 mb-4">صور من المشروع</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {% for screenshot in project.screenshots.all %}
                         <div class="rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition cursor-pointer group">
@@ -82,18 +82,18 @@
                 
                 <!-- Description -->
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-dark-900 mb-4">About This Project</h2>
+                    <h2 class="text-2xl font-bold text-dark-900 mb-4">عن المشروع</h2>
                     <div class="prose prose-gray max-w-none text-gray-700 leading-relaxed whitespace-pre-line">{{ project.full_description }}</div>
                 </div>
                 
                 <!-- Features -->
                 {% if project.features.all %}
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-dark-900 mb-4">Key Features</h3>
+                    <h3 class="text-lg font-semibold text-dark-900 mb-4">أهم المميزات</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {% for feature in project.features.all %}
                         <div class="flex items-start">
-                            <svg class="w-5 h-5 text-primary-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-primary-500 mt-0.5 ms-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                             <span class="text-gray-700">{{ feature.feature }}</span>
@@ -106,7 +106,7 @@
                 <!-- Tech Stack -->
                 {% if project.tech_stack.all %}
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-dark-900 mb-4">Tech Stack</h3>
+                    <h3 class="text-lg font-semibold text-dark-900 mb-4">التقنيات المستخدمة</h3>
                     <div class="flex flex-wrap gap-2">
                         {% for tech in project.tech_stack.all %}
                         <span class="bg-dark-900 text-white text-sm px-4 py-2 rounded-lg font-medium">{{ tech.name }}</span>
@@ -118,7 +118,7 @@
                 <!-- Related Projects -->
                 {% if related %}
                 <div class="mt-12 pt-8 border-t border-gray-100">
-                    <h3 class="text-xl font-bold text-dark-900 mb-6">Related Projects</h3>
+                    <h3 class="text-xl font-bold text-dark-900 mb-6">مشاريع مشابهة</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {% for p in related %}
                         <a href="{% url 'project_detail' p.slug %}" class="group block bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition border border-gray-100">
@@ -127,7 +127,7 @@
                             {% endif %}
                             <div class="p-4">
                                 <h4 class="font-semibold text-dark-900 group-hover:text-primary-600 transition">{{ p.title }}</h4>
-                                <p class="text-sm text-gray-500 mt-1">${{ p.standard_price|floatformat:0 }}</p>
+                                <p class="text-sm text-gray-500 mt-1">{{ p.standard_price|floatformat:0 }} ج.م</p>
                             </div>
                         </a>
                         {% endfor %}
@@ -138,31 +138,31 @@
             
             <!-- Sidebar -->
             <aside class="lg:col-span-1">
-                <div class="sticky top-24 space-y-6">
+                <div class="sticky top-24 gap-6 flex flex-col">
                     <!-- Pricing Card -->
                     <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                         <div class="p-6">
                             <div class="flex items-baseline mb-2">
-                                <span class="text-3xl font-bold text-dark-900">${{ project.standard_price|floatformat:0 }}</span>
-                                <span class="text-gray-500 ml-2">/ one-time</span>
+                                <span class="text-3xl font-bold text-dark-900">{{ project.standard_price|floatformat:0 }} ج.م</span>
+                                <span class="text-gray-500 me-2">/ مرة واحدة</span>
                             </div>
-                            <p class="text-sm text-gray-500 mb-6">Instant download. Full source code + documentation.</p>
+                            <p class="text-sm text-gray-500 mb-6">تحميل فوري. Source Code كامل + الشرح.</p>
                             
                             {% if project.gumroad_standard_url %}
                             <a href="{{ project.gumroad_standard_url }}" target="_blank" rel="noopener" class="block w-full bg-primary-500 hover:bg-primary-600 text-white text-center font-bold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                Buy Standard Package
+                                اشتري النسخة العادية
                             </a>
                             {% endif %}
                             
                             {% if project.demo_url %}
                             <a href="{{ project.demo_url }}" target="_blank" rel="noopener" class="block w-full bg-white border-2 border-gray-200 hover:border-primary-500 text-dark-900 text-center font-semibold py-3 px-6 rounded-lg transition duration-200 mb-3">
-                                View Live Demo
+                                جرب الديمو اونلاين
                             </a>
                             {% endif %}
                             
                             {% if project.documentation_url %}
                             <a href="{{ project.documentation_url }}" target="_blank" rel="noopener" class="block w-full text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2">
-                                View Documentation
+                                شوف التوثيق
                             </a>
                             {% endif %}
                         </div>
@@ -170,12 +170,12 @@
                         {% if project.custom_price %}
                         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-semibold text-dark-900">Custom Build</span>
-                                <span class="text-lg font-bold text-primary-600">${{ project.custom_price|floatformat:0 }}</span>
+                                <span class="font-semibold text-dark-900">تنفيذ مخصص</span>
+                                <span class="text-lg font-bold text-primary-600">{{ project.custom_price|floatformat:0 }} ج.م</span>
                             </div>
-                            <p class="text-xs text-gray-500 mb-3">Built to your exact requirements and university guidelines.</p>
+                            <p class="text-xs text-gray-500 mb-3">مبني حسب متطلباتك وإرشادات جامعتك بالظبط.</p>
                             <a href="#custom-order" class="block w-full bg-dark-900 hover:bg-dark-800 text-white text-center font-semibold py-2 px-4 rounded-lg transition text-sm">
-                                Request Custom Build
+                                اطلب تنفيذ مخصص
                             </a>
                         </div>
                         {% endif %}
@@ -183,43 +183,43 @@
                     
                     <!-- What's Included -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-semibold text-dark-900 mb-4">What's Included</h3>
-                        <ul class="space-y-3 text-sm">
+                        <h3 class="font-semibold text-dark-900 mb-4">إيه اللي هتاخده؟</h3>
+                        <ul class="gap-3 flex flex-col text-sm">
                             <li class="flex items-center text-gray-700">
-                                <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-primary-500 ms-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Complete source code
+                                Source Code كامل
                             </li>
                             <li class="flex items-center text-gray-700">
-                                <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-primary-500 ms-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Setup documentation
+                                شرح خطوة بخطوة للتشغيل
                             </li>
                             <li class="flex items-center text-gray-700">
-                                <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-primary-500 ms-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Database schema diagram
+                                رسمة قاعدة البيانات
                             </li>
                             <li class="flex items-center text-gray-700">
-                                <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-primary-500 ms-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Admin panel configured
+                                Admin Panel جاهز
                             </li>
                             <li class="flex items-center text-gray-700">
-                                <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-primary-500 ms-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Sample data included
+                                بيانات تجريبية جاهزة
                             </li>
                             <li class="flex items-center text-gray-700">
-                                <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-primary-500 ms-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Deployment guide
+                                دليل النشر على السيرفر
                             </li>
                         </ul>
                     </div>
@@ -229,11 +229,11 @@
                         <div class="grid grid-cols-2 gap-4 text-center">
                             <div>
                                 <div class="text-2xl font-bold text-dark-900">{{ project.views_count|intcomma }}</div>
-                                <div class="text-xs text-gray-500">Views</div>
+                                <div class="text-xs text-gray-500">مشاهدة</div>
                             </div>
                             <div>
                                 <div class="text-2xl font-bold text-dark-900">{{ project.sales_count|intcomma }}</div>
-                                <div class="text-xs text-gray-500">Sales</div>
+                                <div class="text-xs text-gray-500">بيعة</div>
                             </div>
                         </div>
                     </div>
@@ -248,8 +248,8 @@
 <section id="custom-order" class="py-16 bg-gray-50 border-t border-gray-200">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10">
-            <h2 class="text-3xl font-bold text-dark-900 mb-4">Request Custom Build</h2>
-            <p class="text-gray-600">Fill in the details below and I'll get back to you within 24 hours with a quote and timeline.</p>
+            <h2 class="text-3xl font-bold text-dark-900 mb-4">اطلب تنفيذ مخصص</h2>
+            <p class="text-gray-600">املى البيانات تحت وهرد عليك في أقل من 24 ساعة بالسعر والموعد.</p>
         </div>
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
             <div id="message-form-container">
