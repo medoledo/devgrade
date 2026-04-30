@@ -51,6 +51,12 @@ input:focus, textarea:focus, select:focus {
     outline: none;
 }
 
+/* Ensure images never overflow their containers */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 /* Image hover zoom container */
 .img-zoom-container {
     overflow: hidden;
@@ -62,4 +68,15 @@ input:focus, textarea:focus, select:focus {
 
 .img-zoom-container:hover img {
     transform: scale(1.05);
+}
+
+/* Prevent long words / URLs from breaking layout */
+body {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Mobile-friendly tables: ensure overflow-x-auto works smoothly */
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
 }

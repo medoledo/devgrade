@@ -64,7 +64,7 @@ def project_list(request):
         'active_category': active_category,
         'query': query or '',
         'page_title': 'كل المشاريع | DevGrade',
-        'meta_description': 'تصفح مشاريع Django الجاهزة لمشروع التخرج. مشاريع مستشفيات، مكتبات، متاجر، مخازن، وأكتر.',
+        'meta_description': 'تصفح مشاريع Django الجاهزة للمشاريع الجامعية. مشاريع مستشفيات، مكتبات، متاجر، مخازن، وأكتر.',
         'canonical_url': request.build_absolute_uri(),
     }
     return render(request, 'projects/project_list.html', context)

@@ -25,8 +25,8 @@ class SingletonModel(models.Model):
 class SiteConfig(SingletonModel):
     site_name = models.CharField(max_length=100, default="DevGrade", verbose_name="Site Name")
     tagline = models.CharField(max_length=200, default="مشاريع Django جاهزة لطلاب الجامعات", verbose_name="Tagline")
-    meta_description = models.TextField(default="اشتري مشاريع Django احترافية جاهزة لمشروع التخرج. تحميل فوري أو تنفيذ مخصص حسب طلبك.", verbose_name="Default Meta Description")
-    meta_keywords = models.CharField(max_length=300, default="مشاريع django, مشاريع تخرج, مشاريع جامعية, علوم الحاسب, IT", verbose_name="Meta Keywords")
+    meta_description = models.TextField(default="اشتري مشاريع Django احترافية جاهزة للمشاريع الجامعية. تحميل فوري أو تنفيذ مخصص حسب طلبك.", verbose_name="Default Meta Description")
+    meta_keywords = models.CharField(max_length=300, default="مشاريع django, مشاريع جامعية, علوم الحاسب, IT", verbose_name="Meta Keywords")
     contact_email = models.EmailField(default="Medoledowork144@gmail.com", verbose_name="Contact Email")
     contact_phone = models.CharField(max_length=50, blank=True, default="01272776895", verbose_name="Phone / WhatsApp")
     footer_text = models.TextField(blank=True, verbose_name="Footer Text")

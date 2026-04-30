@@ -32,7 +32,7 @@
         <!-- Filters -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
             <form method="get" class="flex flex-wrap items-center gap-3">
-                <input type="text" name="q" value="{{ query }}" placeholder="Search projects..." class="text-sm rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 py-2 px-3 w-64">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search projects..." class="text-sm rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 py-2 px-3 w-full sm:w-64">
                 <select name="status" onchange="this.form.submit()" class="text-sm rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 py-2 ps-3 pe-8">
                     <option value="">All Status</option>
                     <option value="published" {% if status_filter == 'published' %}selected{% endif %}>Published</option>
@@ -126,7 +126,7 @@
 
             <!-- Pagination -->
             {% if projects_list.has_other_pages %}
-            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="text-sm text-gray-500">
                     Showing {{ projects_list.start_index }} to {{ projects_list.end_index }} of {{ projects_list.paginator.count }} projects
                 </div>
