@@ -1,0 +1,88 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block dashboard_content %}
+<section class="bg-dark-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-bold">Categories</h1>
+        <p class="text-gray-400 text-sm mt-1">Manage project categories.</p>
+    </div>
+</section>
+
+<section class="py-8 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Add Category Form -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="text-lg font-bold text-dark-900 mb-4">Add New Category</h2>
+            <form method="post" action="{% url 'dashboard_category_add' %}" class="flex gap-3" dir="ltr">
+                {% csrf_token %}
+                <input type="text" name="name" placeholder="Category name..." required
+                       class="flex-1 text-sm rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 py-2 px-3">
+                <button type="submit" class="bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition">Add Category</button>
+            </form>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200" dir="ltr">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projects</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for category in categories %}
+                        <tr id="category-row-{{ category.id }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-dark-900">
+                                <span class="category-name-text" id="cat-name-{{ category.id }}">{{ category.name }}</span>
+                                <form method="post" action="{% url 'dashboard_category_edit' category.id %}" class="hidden inline-edit-form" id="cat-form-{{ category.id }}">
+                                    {% csrf_token %}
+                                    <input type="text" name="name" value="{{ category.name }}" required
+                                           class="inline-edit-input"
+                                           onblur="submitCatForm({{ category.id }})"
+                                           onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+                                </form>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ category.slug }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ category.project_count }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="kebab-menu inline-block">
+                                    <button type="button" onclick="toggleKebab(this)" class="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-500">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="6" r="2"/>
+                                            <circle cx="12" cy="12" r="2"/>
+                                            <circle cx="12" cy="18" r="2"/>
+                                        </svg>
+                                    </button>
+                                    <div class="kebab-dropdown">
+                                        <button type="button" onclick="enableCatEdit({{ category.id }})">Edit</button>
+                                        <form method="post" action="{% url 'dashboard_category_delete' category.id %}" class="inline" onsubmit="return confirm('Delete this category? Projects will become uncategorized.');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-red-600">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                </svg>
+                                <p class="text-sm">No categories yet.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

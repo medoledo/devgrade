@@ -1,5 +1,15 @@
 // Main JS file for DevGrade
 
+// HTMX CSRF Token support for Django
+if (typeof htmx !== 'undefined') {
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (token) {
+            evt.detail.headers['X-CSRFToken'] = token.value;
+        }
+    });
+}
+
 // Mobile menu toggle is handled inline in base.html
 
 // Smooth scroll for anchor links

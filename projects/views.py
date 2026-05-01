@@ -240,6 +240,8 @@ def dashboard(request):
         'status_choices': Message.STATUS_CHOICES,
         'page_title': 'لوحة التحكم | DevGrade',
     }
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/_messages_table.html', context)
     return render(request, 'dashboard/dashboard.html', context)
 
 
@@ -256,6 +258,7 @@ def update_message_status(request, message_id):
     if request.headers.get('HX-Request'):
         return render(request, 'partials/_message_row.html', {
             'msg': message_obj,
+            'status_choices': Message.STATUS_CHOICES,
         })
     return redirect('dashboard')
 
@@ -295,6 +298,8 @@ def dashboard_projects(request):
         'status_filter': status_filter,
         'page_title': 'Projects | DevGrade Dashboard',
     }
+    if request.headers.get('HX-Request'):
+        return render(request, 'partials/_projects_table.html', context)
     return render(request, 'dashboard/projects_list.html', context)
 
 
@@ -385,6 +390,69 @@ def dashboard_feature_delete(request, project_id, feature_id):
     feature.delete()
     messages.success(request, 'Feature deleted!')
     return redirect('dashboard_project_edit', project_id=project.id)
+
+
+@staff_member_required(login_url='admin_login')
+@require_POST
+def dashboard_message_delete(request, message_id):
+    """Delete a message from the dashboard"""
+    message_obj = get_object_or_404(Message, id=message_id)
+    message_obj.delete()
+    messages.success(request, 'تم حذف الرسالة!')
+    return redirect('dashboard')
+
+
+# Category Management
+@staff_member_required(login_url='admin_login')
+def dashboard_categories(request):
+    """List all categories"""
+    categories = Category.objects.annotate(
+        project_count=Count('projects')
+    ).order_by('order', 'name')
+    context = {
+        'categories': categories,
+        'page_title': 'Categories | DevGrade Dashboard',
+    }
+    return render(request, 'dashboard/categories_list.html', context)
+
+
+@staff_member_required(login_url='admin_login')
+def dashboard_category_add(request):
+    """Add a new category"""
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if name:
+            Category.objects.create(name=name)
+            messages.success(request, 'Category created successfully!')
+            return redirect('dashboard_categories')
+        else:
+            messages.error(request, 'Category name is required.')
+    return redirect('dashboard_categories')
+
+
+@staff_member_required(login_url='admin_login')
+def dashboard_category_edit(request, category_id):
+    """Edit a category"""
+    category = get_object_or_404(Category, id=category_id)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if name:
+            category.name = name
+            category.save()
+            messages.success(request, 'Category updated successfully!')
+        else:
+            messages.error(request, 'Category name is required.')
+    return redirect('dashboard_categories')
+
+
+@staff_member_required(login_url='admin_login')
+@require_POST
+def dashboard_category_delete(request, category_id):
+    """Delete a category"""
+    category = get_object_or_404(Category, id=category_id)
+    category.delete()
+    messages.success(request, 'Category deleted successfully!')
+    return redirect('dashboard_categories')
 
 
 # Custom error handlers

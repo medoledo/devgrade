@@ -70,12 +70,11 @@
                 </svg>
                 Add Project
             </a>
-            <a href="/admin/" class="inline-flex items-center bg-white border border-gray-200 hover:border-primary-500 text-dark-900 font-medium py-2 px-4 rounded-lg transition text-sm">
+            <a href="{% url 'dashboard_categories' %}" class="inline-flex items-center bg-white border border-gray-200 hover:border-primary-500 text-dark-900 font-medium py-2 px-4 rounded-lg transition text-sm">
                 <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                 </svg>
-                Django Admin
+                Manage Categories
             </a>
         </div>
         
@@ -84,8 +83,14 @@
             <div class="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 class="text-lg font-bold text-dark-900">الرسايل والطلبات</h2>
                 <div class="flex flex-wrap items-center gap-3">
-                    <form method="get" class="flex flex-wrap items-center gap-2">
-                        <select name="status" onchange="this.form.submit()" class="text-sm rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 py-2 ps-3 pe-8">
+                    <form hx-get="{% url 'dashboard' %}"
+                          hx-target="#messages-table-container"
+                          hx-swap="innerHTML"
+                          hx-push-url="true"
+                          hx-indicator="#messages-loading"
+                          class="flex flex-wrap items-center gap-2">
+                        {% csrf_token %}
+                        <select name="status" class="text-sm rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 py-2 ps-3 pe-8">
                             <option value="">كل الحالات</option>
                             {% for value, label in status_choices %}
                             <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -97,54 +102,18 @@
                         <a href="{% url 'dashboard' %}" class="text-sm text-gray-500 hover:text-red-600 transition">مسح</a>
                         {% endif %}
                     </form>
+                    <span id="messages-loading" class="htmx-indicator">
+                        <svg class="animate-spin h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
                 </div>
             </div>
             
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التواصل</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التفاصيل</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الميزانية / التاريخ</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for msg in messages_list %}
-                        {% include 'partials/_message_row.html' %}
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                                </svg>
-                                <p class="text-sm">مفيش رسايل لسه.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div id="messages-table-container">
+                {% include 'partials/_messages_table.html' %}
             </div>
-            
-            <!-- Pagination -->
-            {% if messages_list.has_other_pages %}
-            <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-sm text-gray-500">
-                    بيعرض {{ messages_list.start_index }} لـ {{ messages_list.end_index }} من {{ messages_list.paginator.count }} رسالة
-                </div>
-                <div class="flex items-center gap-2">
-                    {% if messages_list.has_previous %}
-                    <a href="?page={{ messages_list.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" class="px-3 py-1 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">السابق</a>
-                    {% endif %}
-                    <span class="text-sm text-gray-500">صفحة {{ messages_list.number }} من {{ messages_list.paginator.num_pages }}</span>
-                    {% if messages_list.has_next %}
-                    <a href="?page={{ messages_list.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" class="px-3 py-1 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">التالي</a>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
 </section>
