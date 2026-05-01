@@ -29,7 +29,7 @@ class MessageForm(forms.ModelForm):
             }),
             'expected_budget': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
-                'placeholder': 'مثلاً: 2000 - 3000 جنيه',
+                'placeholder': 'مثلاً: 2000 - 7000 جنيه',
             }),
             'delivery_date': forms.DateInput(attrs={
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition',
