@@ -47,12 +47,13 @@
             </div>
         </div>
 
-        <div class="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div class="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-lg p-4" id="budget-awareness-box">
             {{ form.is_aware_min_budget }}
-            <label class="text-sm text-gray-700 leading-relaxed">
-                أنا على وعي أن المشروع لن يكلف أقل من <span class="font-bold text-dark-900">3000 جنيه مصري</span>
+            <label for="{{ form.is_aware_min_budget.id_for_label }}" class="text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
+                <span class="text-red-500 font-bold">*</span> أنا على وعي أن المشروع لن يكلف أقل من <span class="font-bold text-dark-900">3000 جنيه مصري</span>
             </label>
         </div>
+        <p id="budget-awareness-error" class="text-red-600 text-sm hidden">يجب الموافقة على بيان الميزانية قبل إرسال الطلب.</p>
         {% if form.is_aware_min_budget.errors %}
         <p class="text-red-600 text-sm">{{ form.is_aware_min_budget.errors.0 }}</p>
         {% endif %}
@@ -65,3 +66,46 @@
         </button>
     </div>
 </form>
+
+<script>
+(function() {
+    const form = document.currentScript.previousElementSibling;
+    if (!form) return;
+    const checkbox = form.querySelector('input[name="is_aware_min_budget"]');
+    const errorMsg = document.getElementById('budget-awareness-error');
+    const box = document.getElementById('budget-awareness-box');
+    if (!checkbox) return;
+
+    function validateCheckbox() {
+        if (!checkbox.checked) {
+            if (errorMsg) errorMsg.classList.remove('hidden');
+            if (box) box.classList.add('border-red-400', 'bg-red-50');
+            return false;
+        }
+        if (errorMsg) errorMsg.classList.add('hidden');
+        if (box) box.classList.remove('border-red-400', 'bg-red-50');
+        return true;
+    }
+
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            if (errorMsg) errorMsg.classList.add('hidden');
+            if (box) box.classList.remove('border-red-400', 'bg-red-50');
+        }
+    });
+
+    // For HTMX forms: intercept before request
+    form.addEventListener('htmx:confirm', function(evt) {
+        if (!validateCheckbox()) {
+            evt.preventDefault();
+        }
+    });
+
+    // For regular forms: intercept submit
+    form.addEventListener('submit', function(evt) {
+        if (!validateCheckbox()) {
+            evt.preventDefault();
+        }
+    });
+})();
+</script>

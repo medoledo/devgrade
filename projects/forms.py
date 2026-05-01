@@ -36,9 +36,14 @@ class MessageForm(forms.ModelForm):
                 'type': 'date',
             }),
             'is_aware_min_budget': forms.CheckboxInput(attrs={
-                'class': 'w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500',
+                'class': 'w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500 cursor-pointer',
+                'required': True,
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['is_aware_min_budget'].required = True
 
 
 class ProjectForm(forms.ModelForm):
@@ -52,15 +57,15 @@ class ProjectForm(forms.ModelForm):
         ]
         widgets = {
             'title': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
                 'placeholder': 'مثلاً: نظام إدارة مكتبة جامعية',
             }),
             'slug': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
                 'placeholder': 'library-management-system (اتركه فارغاً للتوليد التلقائي)',
             }),
             'category': forms.Select(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
             }),
             'full_description': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50 resize-y',
@@ -73,20 +78,20 @@ class ProjectForm(forms.ModelForm):
                 'accept': 'image/*',
             }),
             'demo_url': forms.URLInput(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
                 'placeholder': 'https://demo.example.com',
             }),
             'gumroad_standard_url': forms.URLInput(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
                 'placeholder': 'https://gumroad.com/l/...',
             }),
             'standard_price': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-12 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
                 'placeholder': '1500',
                 'min': '0',
             }),
             'custom_price': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-12 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
                 'placeholder': '2000',
                 'min': '0',
             }),
@@ -98,7 +103,7 @@ class ProjectForm(forms.ModelForm):
                 'class': 'w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500 cursor-pointer',
             }),
             'order': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
+                'class': 'w-full pr-10 pl-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50',
                 'placeholder': '0',
             }),
         }
