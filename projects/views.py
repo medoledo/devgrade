@@ -188,6 +188,7 @@ def admin_login(request):
     """Custom admin login page"""
     if request.user.is_staff:
         return redirect('dashboard')
+    error = None
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -196,8 +197,11 @@ def admin_login(request):
             login(request, user)
             return redirect('dashboard')
         else:
-            messages.error(request, 'البيانات غلط أو إنت مش Admin. لو نسيت الباسورد، روح لـ Django Admin.')
-    return render(request, 'dashboard/login.html', {'page_title': 'Admin Login | DevGrade'})
+            error = 'البيانات غلط أو إنت مش Admin. لو نسيت الباسورد، روح لـ Django Admin.'
+    return render(request, 'dashboard/login.html', {
+        'page_title': 'Admin Login | DevGrade',
+        'login_error': error,
+    })
 
 
 @staff_member_required(login_url='admin_login')

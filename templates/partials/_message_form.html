@@ -1,4 +1,8 @@
-<form hx-post="{% url 'submit_message' %}" hx-target="#message-form-container" hx-swap="innerHTML">
+{% if project %}
+<form hx-post="{% url 'submit_message' project.slug %}" hx-target="#message-form-container" hx-swap="innerHTML">
+{% else %}
+<form method="post" action="{% url 'contact' %}">
+{% endif %}
     {% csrf_token %}
 
     <div class="gap-4 flex flex-col">

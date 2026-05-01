@@ -2,187 +2,828 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Custom scrollbar for stepper */
+    .stepper-scroll::-webkit-scrollbar { height: 4px; }
+    .stepper-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    
+    /* Dropzone animations */
+    .dropzone { transition: all 0.2s ease; }
+    .dropzone.drag-over { border-color: #22c55e; background: #f0fdf4; transform: scale(1.01); }
+    
+    /* Chip selection animation */
+    .tech-chip { transition: all 0.15s ease; }
+    .tech-chip.selected { background: #16a34a; color: white; border-color: #16a34a; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2); }
+    .tech-chip:hover:not(.selected) { border-color: #22c55e; background: #f0fdf4; }
+    
+    /* Feature tag */
+    .feature-tag { animation: tagIn 0.2s ease; }
+    @keyframes tagIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    
+    /* Image preview hover */
+    .img-preview:hover .img-overlay { opacity: 1; }
+    
+    /* Step section transition */
+    .step-section { scroll-margin-top: 100px; }
+    
+    /* Input focus ring smooth */
+    input, textarea, select { transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; }
+    
+    /* Error shake */
+    .shake { animation: shake 0.4s ease; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+</style>
+{% endblock %}
+
 {% block dashboard_content %}
-<section class="bg-dark-900 text-white py-8">
+<!-- Hero Header -->
+<section class="bg-gradient-to-l from-dark-900 to-dark-800 text-white py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-2xl font-bold">{% if project %}Edit Project{% else %}Add Project{% endif %}</h1>
-        <p class="text-gray-400 text-sm mt-1">{% if project %}Update {{ project.title }}{% else %}Create a new project{% endif %}</p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight">
+                    {% if project %}تعديل المشروع{% else %}إضافة مشروع جديد{% endif %}
+                </h1>
+                <p class="text-gray-400 text-sm mt-2 max-w-lg">
+                    {% if project %}حدث بيانات {{ project.title }}{% else %}أضف مشروعاً جديداً بكل سهولة باستخدام النموذج التفاعلي أدناه{% endif %}
+                </p>
+            </div>
+            <a href="{% url 'dashboard_projects' %}" class="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-lg backdrop-blur">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+                العودة للمشاريع
+            </a>
+        </div>
     </div>
 </section>
 
-<section class="py-8 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-6">
-            <a href="{% url 'dashboard_projects' %}" class="inline-flex items-center text-gray-600 hover:text-primary-600 transition text-sm">
-                <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Back to Projects
-            </a>
+<!-- Sticky Stepper -->
+<div class="sticky top-16 z-40 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 py-3 stepper-scroll overflow-x-auto">
+            <button type="button" onclick="scrollToStep('step-basic')" class="step-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition bg-primary-50 text-primary-700 border border-primary-200" data-step="step-basic">
+                <span class="w-5 h-5 rounded-full bg-primary-600 text-white text-xs flex items-center justify-center">1</span>
+                المعلومات الأساسية
+            </button>
+            <div class="w-6 h-px bg-gray-300 flex-shrink-0"></div>
+            <button type="button" onclick="scrollToStep('step-pricing')" class="step-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition text-gray-500 hover:text-gray-700 hover:bg-gray-50" data-step="step-pricing">
+                <span class="w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">2</span>
+                السعر والروابط
+            </button>
+            <div class="w-6 h-px bg-gray-300 flex-shrink-0"></div>
+            <button type="button" onclick="scrollToStep('step-tech')" class="step-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition text-gray-500 hover:text-gray-700 hover:bg-gray-50" data-step="step-tech">
+                <span class="w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">3</span>
+                التقنيات والإعدادات
+            </button>
+            <div class="w-6 h-px bg-gray-300 flex-shrink-0"></div>
+            <button type="button" onclick="scrollToStep('step-media')" class="step-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition text-gray-500 hover:text-gray-700 hover:bg-gray-50" data-step="step-media">
+                <span class="w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">4</span>
+                الصور والوسائط
+            </button>
+            <div class="w-6 h-px bg-gray-300 flex-shrink-0"></div>
+            <button type="button" onclick="scrollToStep('step-features')" class="step-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition text-gray-500 hover:text-gray-700 hover:bg-gray-50" data-step="step-features">
+                <span class="w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">5</span>
+                المميزات
+            </button>
         </div>
+    </div>
+</div>
 
-        <form method="post" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+<!-- Main Form -->
+<section class="py-8 bg-gray-50/50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <form method="post" enctype="multipart/form-data" id="project-form" class="space-y-6" novalidate>
             {% csrf_token %}
 
-            <!-- Basic Info -->
-            <div class="mb-8">
-                <h2 class="text-lg font-bold text-dark-900 mb-4 pb-2 border-b border-gray-100">Basic Information</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
-                        {{ form.title }}
-                        {% if form.title.errors %}<p class="text-red-600 text-sm mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+            <!-- Step 1: Basic Information -->
+            <div id="step-basic" class="step-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Slug (leave empty to auto-generate)</label>
-                        {{ form.slug }}
-                        {% if form.slug.errors %}<p class="text-red-600 text-sm mt-1">{{ form.slug.errors.0 }}</p>{% endif %}
+                        <h2 class="text-lg font-bold text-dark-900">المعلومات الأساسية</h2>
+                        <p class="text-xs text-gray-500">اسم المشروع، التصنيف، والوصف</p>
                     </div>
                 </div>
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                    {{ form.category }}
-                    {% if form.category.errors %}<p class="text-red-600 text-sm mt-1">{{ form.category.errors.0 }}</p>{% endif %}
+                <div class="p-6 space-y-6">
+                    <!-- Title & Slug -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="field-group">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> {{ form.title.label }}
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </div>
+                                {{ form.title }}
+                            </div>
+                            {% if form.title.errors %}<p class="text-red-600 text-sm mt-1.5 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ form.title.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.slug.label }}</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                    </svg>
+                                </div>
+                                {{ form.slug }}
+                            </div>
+                            {% if form.slug.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.slug.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="field-group">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.category.label }}</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                </svg>
+                            </div>
+                            {{ form.category }}
+                        </div>
+                        {% if form.category.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.category.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <!-- Full Description -->
+                    <div class="field-group">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-semibold text-gray-700">
+                                <span class="text-red-500">*</span> {{ form.full_description.label }}
+                            </label>
+                            <span class="text-xs text-gray-400" id="desc-counter">0 / 2000</span>
+                        </div>
+                        {{ form.full_description }}
+                        {% if form.full_description.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.full_description.errors.0 }}</p>{% endif %}
+                    </div>
                 </div>
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Description *</label>
-                    {{ form.full_description }}
-                    {% if form.full_description.errors %}<p class="text-red-600 text-sm mt-1">{{ form.full_description.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Step 2: Pricing & Links -->
+            <div id="step-pricing" class="step-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-dark-900">السعر والروابط</h2>
+                        <p class="text-xs text-gray-500">حدد الأسعار والروابط المرتبطة</p>
+                    </div>
                 </div>
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Thumbnail</label>
-                    {{ form.thumbnail }}
-                    {% if project and project.thumbnail %}
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="field-group">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> {{ form.standard_price.label }}
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </div>
+                                {{ form.standard_price }}
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm font-medium">جنيه</div>
+                            </div>
+                            {% if form.standard_price.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.standard_price.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.custom_price.label }}</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                    </svg>
+                                </div>
+                                {{ form.custom_price }}
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm font-medium">جنيه</div>
+                            </div>
+                            {% if form.custom_price.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.custom_price.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="field-group">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.demo_url.label }}</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </div>
+                                {{ form.demo_url }}
+                            </div>
+                            {% if form.demo_url.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.demo_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.gumroad_standard_url.label }}</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                    </svg>
+                                </div>
+                                {{ form.gumroad_standard_url }}
+                            </div>
+                            {% if form.gumroad_standard_url.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.gumroad_standard_url.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Tech Stack & Settings -->
+            <div id="step-tech" class="step-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-dark-900">التقنيات والإعدادات</h2>
+                        <p class="text-xs text-gray-500">التقنيات المستخدمة وخيارات العرض</p>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <!-- Tech Stack Chips -->
+                    <div class="field-group">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">{{ form.tech_stack.label }}</label>
+                        <div class="flex flex-wrap gap-2" id="tech-stack-container">
+                            {% for choice in form.tech_stack %}
+                            <label class="tech-chip cursor-pointer select-none inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-medium">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% if form.tech_stack.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.tech_stack.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <!-- Settings Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+                        <div class="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:bg-gray-50 transition">
+                            {{ form.is_featured }}
+                            <div>
+                                <label for="{{ form.is_featured.id_for_label }}" class="text-sm font-semibold text-gray-700 cursor-pointer">{{ form.is_featured.label }}</label>
+                                <p class="text-xs text-gray-400">يظهر في قسم المميزات</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:bg-gray-50 transition">
+                            {{ form.is_published }}
+                            <div>
+                                <label for="{{ form.is_published.id_for_label }}" class="text-sm font-semibold text-gray-700 cursor-pointer">{{ form.is_published.label }}</label>
+                                <p class="text-xs text-gray-400">متاح للجميع على الموقع</p>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.order.label }}</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                    </svg>
+                                </div>
+                                {{ form.order }}
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">الرقم الأصغر يظهر أولاً</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Media -->
+            <div id="step-media" class="step-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-dark-900">الصور والوسائط</h2>
+                        <p class="text-xs text-gray-500">الصورة الرئيسية وصور العرض الإضافية</p>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <!-- Thumbnail Dropzone -->
+                    <div class="field-group">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">{{ form.thumbnail.label }}</label>
+                        <div class="dropzone relative border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-primary-400 transition bg-gray-50/30" id="thumbnail-dropzone">
+                            {{ form.thumbnail }}
+                            <input type="file" id="thumbnail-proxy" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div id="thumbnail-placeholder" class="space-y-3">
+                                <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">اسحب صورة هنا أو اضغط لاختيارها</p>
+                                    <p class="text-xs text-gray-400 mt-1">PNG, JPG, WEBP حتى 5 ميجابايت</p>
+                                </div>
+                            </div>
+                            <div id="thumbnail-preview" class="hidden relative inline-block">
+                                <img src="" alt="Thumbnail preview" class="h-48 w-auto rounded-xl object-cover border border-gray-200 shadow-sm mx-auto">
+                                <button type="button" onclick="clearThumbnail(event)" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        {% if project and project.thumbnail %}
+                        <div class="mt-3 flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                            <img src="{{ project.thumbnail.url }}" alt="Current thumbnail" class="h-14 w-14 rounded-lg object-cover border border-gray-200">
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">الصورة الحالية</p>
+                                <p class="text-xs text-gray-400">ارفع صورة جديدة لاستبدالها</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if form.thumbnail.errors %}<p class="text-red-600 text-sm mt-1.5">{{ form.thumbnail.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <!-- Project Images Dropzone -->
+                    <div class="field-group">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">صور إضافية للمشروع</label>
+                        <div class="dropzone relative border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-primary-400 transition bg-gray-50/30" id="images-dropzone">
+                            <input type="file" name="images" id="images-proxy" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div id="images-placeholder" class="space-y-3">
+                                <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">اسحب صوراً هنا أو اضغط لاختيارها</p>
+                                    <p class="text-xs text-gray-400 mt-1">يمكنك اختيار عدة صور دفعة واحدة</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- New Images Preview Grid -->
+                        <div id="new-images-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4 hidden"></div>
+
+                        <!-- Existing Images -->
+                        {% if project and project.images.all %}
+                        <div class="mt-4">
+                            <p class="text-sm font-medium text-gray-700 mb-3">الصور الحالية</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {% for img in project.images.all %}
+                                <div class="relative group img-preview rounded-xl overflow-hidden border border-gray-200">
+                                    <img src="{{ img.image.url }}" alt="" class="w-full h-28 object-cover">
+                                    <div class="img-overlay absolute inset-0 bg-black/50 opacity-0 transition flex items-center justify-center">
+                                        <form method="post" action="{% url 'dashboard_image_delete' project.id img.id %}" class="inline" onsubmit="return confirm('هل تريد حذف هذه الصورة؟');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Features -->
+            <div id="step-features" class="step-section bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-dark-900">المميزات</h2>
+                        <p class="text-xs text-gray-500">أضف مميزات المشروع بشكل تفاعلي</p>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <!-- Interactive Feature Input -->
+                    <div class="field-group">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">إضافة ميزة جديدة</label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-gray-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                </div>
+                                <input type="text" id="feature-input" class="w-full px-4 py-3 pr-10 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition bg-gray-50/50" placeholder="اكتب الميزة واضغط Enter...">
+                            </div>
+                            <button type="button" onclick="addFeature()" class="bg-primary-500 hover:bg-primary-600 text-white font-semibold px-5 py-3 rounded-xl transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                <span class="hidden sm:inline">إضافة</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">اضغط Enter أو زر الإضافة لإضافة الميزة</p>
+                    </div>
+
+                    <!-- Features Tags Container -->
+                    <div id="features-container" class="flex flex-wrap gap-2 min-h-[60px] p-4 rounded-xl border border-gray-200 bg-gray-50/30">
+                        <p id="features-empty" class="text-sm text-gray-400 w-full text-center py-2">لا توجد مميزات مضافة بعد. أضف أول ميزة أعلاه!</p>
+                    </div>
+                    <!-- Hidden textarea to submit features -->
+                    <textarea name="features" id="features-textarea" rows="4" class="hidden"></textarea>
+
+                    <!-- Existing Features (for edit mode) -->
+                    {% if project and project.features.all %}
                     <div class="mt-2">
-                        <img src="{{ project.thumbnail.url }}" alt="Current thumbnail" class="h-24 rounded-lg object-cover border border-gray-200">
-                        <p class="text-xs text-gray-500 mt-1">Current thumbnail. Upload a new one to replace it.</p>
+                        <p class="text-sm font-medium text-gray-700 mb-3">المميزات المحفوظة (يمكنك حذفها)</p>
+                        <div class="flex flex-wrap gap-2" id="existing-features">
+                            {% for feat in project.features.all %}
+                            <div class="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-xl text-sm font-medium border border-primary-100">
+                                {{ feat.feature }}
+                                <form method="post" action="{% url 'dashboard_feature_delete' project.id feat.id %}" class="inline" onsubmit="return confirm('هل تريد حذف هذه الميزة؟');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="hover:text-red-600 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                     {% endif %}
-                    {% if form.thumbnail.errors %}<p class="text-red-600 text-sm mt-1">{{ form.thumbnail.errors.0 }}</p>{% endif %}
-                </div>
-            </div>
-
-            <!-- Pricing & Links -->
-            <div class="mb-8">
-                <h2 class="text-lg font-bold text-dark-900 mb-4 pb-2 border-b border-gray-100">Pricing & Links</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Standard Price (EGP) *</label>
-                        {{ form.standard_price }}
-                        {% if form.standard_price.errors %}<p class="text-red-600 text-sm mt-1">{{ form.standard_price.errors.0 }}</p>{% endif %}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Custom Price (EGP)</label>
-                        {{ form.custom_price }}
-                        {% if form.custom_price.errors %}<p class="text-red-600 text-sm mt-1">{{ form.custom_price.errors.0 }}</p>{% endif %}
-                    </div>
-                </div>
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Demo URL</label>
-                    {{ form.demo_url }}
-                    {% if form.demo_url.errors %}<p class="text-red-600 text-sm mt-1">{{ form.demo_url.errors.0 }}</p>{% endif %}
-                </div>
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Gumroad URL</label>
-                    {{ form.gumroad_standard_url }}
-                    {% if form.gumroad_standard_url.errors %}<p class="text-red-600 text-sm mt-1">{{ form.gumroad_standard_url.errors.0 }}</p>{% endif %}
-                </div>
-            </div>
-
-            <!-- Tech Stack & Settings -->
-            <div class="mb-8">
-                <h2 class="text-lg font-bold text-dark-900 mb-4 pb-2 border-b border-gray-100">Tech Stack & Settings</h2>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tech Stack</label>
-                    <div class="flex flex-wrap gap-3">
-                        {{ form.tech_stack }}
-                    </div>
-                    {% if form.tech_stack.errors %}<p class="text-red-600 text-sm mt-1">{{ form.tech_stack.errors.0 }}</p>{% endif %}
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="flex items-center gap-3">
-                        {{ form.is_featured }}
-                        <label class="text-sm font-medium text-gray-700">Featured?</label>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        {{ form.is_published }}
-                        <label class="text-sm font-medium text-gray-700">Published?</label>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Order</label>
-                        {{ form.order }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Project Images -->
-            <div class="mb-8">
-                <h2 class="text-lg font-bold text-dark-900 mb-4 pb-2 border-b border-gray-100">Project Images</h2>
-                {% if project and project.images.all %}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    {% for img in project.images.all %}
-                    <div class="relative group">
-                        <img src="{{ img.image.url }}" alt="" class="w-full h-24 object-cover rounded-lg border border-gray-200">
-                        <form method="post" action="{% url 'dashboard_image_delete' project.id img.id %}" class="absolute top-1 left-1" onsubmit="return confirm('Delete this image?');">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload New Images (you can select multiple)</label>
-                    <input type="file" name="images" multiple accept="image/*" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition">
-                </div>
-            </div>
-
-            <!-- Features -->
-            <div class="mb-8">
-                <h2 class="text-lg font-bold text-dark-900 mb-4 pb-2 border-b border-gray-100">Features</h2>
-                {% if project and project.features.all %}
-                <div class="flex flex-wrap gap-2 mb-4">
-                    {% for feat in project.features.all %}
-                    <div class="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-3 py-1.5 rounded-lg text-sm">
-                        {{ feat.feature }}
-                        <form method="post" action="{% url 'dashboard_feature_delete' project.id feat.id %}" class="inline" onsubmit="return confirm('Delete this feature?');">
-                            {% csrf_token %}
-                            <button type="submit" class="hover:text-red-600">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Add New Features (one per line)</label>
-                    <textarea name="features" rows="4" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition" placeholder="Feature 1&#10;Feature 2&#10;Feature 3"></textarea>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-100">
-                <a href="{% url 'dashboard_projects' %}" class="text-gray-600 hover:text-gray-800 font-medium transition">Cancel</a>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 pb-10">
+                <a href="{% url 'dashboard_projects' %}" class="text-gray-500 hover:text-gray-700 font-medium transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    إلغاء
+                </a>
                 <div class="flex items-center gap-3">
                     {% if project %}
-                    <form method="post" action="{% url 'dashboard_project_delete' project.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this project? This cannot be undone.');">
+                    <form method="post" action="{% url 'dashboard_project_delete' project.id %}" class="inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المشروع؟ لا يمكن التراجع.');">
                         {% csrf_token %}
-                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 px-6 rounded-lg transition">Delete Project</button>
+                        <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-3 px-6 rounded-xl transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            حذف المشروع
+                        </button>
                     </form>
                     {% endif %}
-                    <button type="submit" class="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2.5 px-6 rounded-lg transition">
-                        {% if project %}Save Changes{% else %}Create Project{% endif %}
+                    <button type="submit" class="bg-gradient-to-l from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold py-3.5 px-8 rounded-xl transition shadow-lg shadow-primary-500/25 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        {% if project %}حفظ التغييرات{% else %}إنشاء المشروع{% endif %}
                     </button>
                 </div>
             </div>
         </form>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// =====================
+// Stepper Navigation
+// =====================
+function scrollToStep(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Update active step based on scroll
+const stepSections = document.querySelectorAll('.step-section');
+const stepBtns = document.querySelectorAll('.step-btn');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            stepBtns.forEach(btn => {
+                const step = btn.dataset.step;
+                if (step === entry.target.id) {
+                    btn.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+                    btn.classList.add('bg-primary-50', 'text-primary-700', 'border', 'border-primary-200');
+                    btn.querySelector('span').classList.remove('bg-gray-200', 'text-gray-600');
+                    btn.querySelector('span').classList.add('bg-primary-600', 'text-white');
+                } else {
+                    btn.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+                    btn.classList.remove('bg-primary-50', 'text-primary-700', 'border', 'border-primary-200');
+                    btn.querySelector('span').classList.add('bg-gray-200', 'text-gray-600');
+                    btn.querySelector('span').classList.remove('bg-primary-600', 'text-white');
+                }
+            });
+        }
+    });
+}, { rootMargin: '-100px 0px -60% 0px' });
+stepSections.forEach(s => observer.observe(s));
+
+// =====================
+// Tech Stack Chips
+// =====================
+function initTechStack() {
+    const container = document.getElementById('tech-stack-container');
+    if (!container) return;
+    container.querySelectorAll('label').forEach(label => {
+        const input = label.querySelector('input[type="checkbox"]');
+        if (!input) return;
+        if (input.checked) label.classList.add('selected');
+        input.addEventListener('change', () => {
+            label.classList.toggle('selected', input.checked);
+        });
+    });
+}
+initTechStack();
+
+// =====================
+// Thumbnail Dropzone
+// =====================
+const thumbDropzone = document.getElementById('thumbnail-dropzone');
+const thumbInput = document.getElementById('thumbnail-input');
+const thumbProxy = document.getElementById('thumbnail-proxy');
+const thumbPlaceholder = document.getElementById('thumbnail-placeholder');
+const thumbPreview = document.getElementById('thumbnail-preview');
+const thumbPreviewImg = thumbPreview.querySelector('img');
+
+function handleThumbFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        thumbPreviewImg.src = e.target.result;
+        thumbPlaceholder.classList.add('hidden');
+        thumbPreview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+    // Transfer to real input
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    thumbInput.files = dt.files;
+}
+
+function clearThumbnail(e) {
+    if(e) e.stopPropagation();
+    thumbInput.value = '';
+    thumbProxy.value = '';
+    thumbPreviewImg.src = '';
+    thumbPreview.classList.add('hidden');
+    thumbPlaceholder.classList.remove('hidden');
+}
+
+if (thumbProxy) {
+    thumbProxy.addEventListener('change', e => handleThumbFile(e.target.files[0]));
+}
+if (thumbDropzone) {
+    ['dragenter', 'dragover'].forEach(evt => {
+        thumbDropzone.addEventListener(evt, e => {
+            e.preventDefault();
+            thumbDropzone.classList.add('drag-over');
+            if (thumbProxy) thumbProxy.classList.add('pointer-events-none');
+        });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        thumbDropzone.addEventListener(evt, e => {
+            e.preventDefault();
+            thumbDropzone.classList.remove('drag-over');
+            if (thumbProxy) thumbProxy.classList.remove('pointer-events-none');
+        });
+    });
+    thumbDropzone.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        handleThumbFile(file);
+    });
+}
+
+// =====================
+// Images Dropzone
+// =====================
+const imagesDropzone = document.getElementById('images-dropzone');
+const imagesProxy = document.getElementById('images-proxy');
+const imagesPlaceholder = document.getElementById('images-placeholder');
+const newImagesGrid = document.getElementById('new-images-grid');
+let newImagesFiles = [];
+
+function renderNewImages() {
+    newImagesGrid.innerHTML = '';
+    if (newImagesFiles.length === 0) {
+        newImagesGrid.classList.add('hidden');
+        imagesPlaceholder.classList.remove('hidden');
+        return;
+    }
+    newImagesGrid.classList.remove('hidden');
+    imagesPlaceholder.classList.add('hidden');
+    newImagesFiles.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const div = document.createElement('div');
+            div.className = 'relative group img-preview rounded-xl overflow-hidden border border-gray-200';
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="" class="w-full h-28 object-cover">
+                <div class="img-overlay absolute inset-0 bg-black/50 opacity-0 transition flex items-center justify-center">
+                    <button type="button" onclick="removeNewImage(${idx})" class="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            newImagesGrid.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeNewImage(idx) {
+    newImagesFiles.splice(idx, 1);
+    updateImagesInput();
+    renderNewImages();
+}
+
+function updateImagesInput() {
+    const dt = new DataTransfer();
+    newImagesFiles.forEach(f => dt.items.add(f));
+    imagesProxy.files = dt.files;
+}
+
+if (imagesProxy) {
+    imagesProxy.addEventListener('change', e => {
+        const files = Array.from(e.target.files);
+        newImagesFiles = newImagesFiles.concat(files);
+        updateImagesInput();
+        renderNewImages();
+    });
+}
+
+if (imagesDropzone) {
+    ['dragenter', 'dragover'].forEach(evt => {
+        imagesDropzone.addEventListener(evt, e => {
+            e.preventDefault();
+            imagesDropzone.classList.add('drag-over');
+            if (imagesProxy) imagesProxy.classList.add('pointer-events-none');
+        });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        imagesDropzone.addEventListener(evt, e => {
+            e.preventDefault();
+            imagesDropzone.classList.remove('drag-over');
+            if (imagesProxy) imagesProxy.classList.remove('pointer-events-none');
+        });
+    });
+    imagesDropzone.addEventListener('drop', e => {
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        newImagesFiles = newImagesFiles.concat(files);
+        updateImagesInput();
+        renderNewImages();
+    });
+}
+
+// =====================
+// Interactive Features
+// =====================
+const featureInput = document.getElementById('feature-input');
+const featuresContainer = document.getElementById('features-container');
+const featuresEmpty = document.getElementById('features-empty');
+const featuresTextarea = document.getElementById('features-textarea');
+let featuresList = [];
+
+// Load existing from textarea on edit
+function loadExistingFeatures() {
+    const val = featuresTextarea.value.trim();
+    if (val) {
+        val.split('\n').forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed && !featuresList.includes(trimmed)) featuresList.push(trimmed);
+        });
+    }
+    renderFeatures();
+}
+
+function renderFeatures() {
+    featuresContainer.innerHTML = '';
+    if (featuresList.length === 0) {
+        featuresContainer.appendChild(featuresEmpty);
+        featuresEmpty.style.display = 'block';
+    } else {
+        if (featuresEmpty) featuresEmpty.style.display = 'none';
+        featuresList.forEach((feat, idx) => {
+            const tag = document.createElement('div');
+            tag.className = 'feature-tag inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-xl text-sm font-medium border border-primary-100';
+            tag.innerHTML = `
+                <span>${escapeHtml(feat)}</span>
+                <button type="button" onclick="removeFeature(${idx})" class="hover:text-red-600 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            `;
+            featuresContainer.appendChild(tag);
+        });
+    }
+    featuresTextarea.value = featuresList.join('\n');
+}
+
+function addFeature() {
+    const val = featureInput.value.trim();
+    if (!val) return;
+    if (featuresList.includes(val)) {
+        featureInput.classList.add('border-red-500', 'ring-1', 'ring-red-200', 'shake');
+        setTimeout(() => featureInput.classList.remove('border-red-500', 'ring-1', 'ring-red-200', 'shake'), 1000);
+        return;
+    }
+    featuresList.push(val);
+    featureInput.value = '';
+    renderFeatures();
+}
+
+function removeFeature(idx) {
+    featuresList.splice(idx, 1);
+    renderFeatures();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+if (featureInput) {
+    featureInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addFeature(); }
+    });
+    loadExistingFeatures();
+}
+
+// =====================
+// Character Counter
+// =====================
+const descField = document.getElementById('id_full_description');
+const descCounter = document.getElementById('desc-counter');
+if (descField && descCounter) {
+    const maxLen = 2000;
+    function updateCounter() {
+        const len = descField.value.length;
+        descCounter.textContent = `${len} / ${maxLen}`;
+        if (len > maxLen) descCounter.classList.add('text-red-500');
+        else descCounter.classList.remove('text-red-500');
+    }
+    descField.addEventListener('input', updateCounter);
+    updateCounter();
+}
+
+// =====================
+// Form Validation
+// =====================
+const projectForm = document.getElementById('project-form');
+projectForm.addEventListener('submit', function(e) {
+    let hasError = false;
+    const requiredIds = ['id_title', 'id_full_description', 'id_standard_price'];
+    requiredIds.forEach(id => {
+        const field = document.getElementById(id);
+        if (field && !field.value.trim()) {
+            field.classList.add('border-red-500', 'ring-1', 'ring-red-200');
+            field.parentElement.parentElement.classList.add('shake');
+            setTimeout(() => field.parentElement.parentElement.classList.remove('shake'), 500);
+            hasError = true;
+        }
+    });
+
+    // Price validation
+    const priceField = document.getElementById('id_standard_price');
+    if (priceField && priceField.value && parseFloat(priceField.value) < 0) {
+        priceField.classList.add('border-red-500', 'ring-1', 'ring-red-200');
+        hasError = true;
+    }
+
+    if (hasError) {
+        e.preventDefault();
+        // Scroll to first error
+        const firstError = projectForm.querySelector('.border-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+
+projectForm.querySelectorAll('input, textarea, select').forEach(field => {
+    field.addEventListener('input', function() {
+        this.classList.remove('border-red-500', 'ring-1', 'ring-red-200');
+    });
+});
+</script>
 {% endblock %}
