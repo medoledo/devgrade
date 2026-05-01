@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, TechStack, Project, ProjectScreenshot, ProjectFeature, Message, SiteConfig
+from .models import Category, TechStack, Project, ProjectImage, ProjectFeature, Message, SiteConfig
 
 
-class ProjectScreenshotInline(admin.TabularInline):
-    model = ProjectScreenshot
+class ProjectImageInline(admin.TabularInline):
+    model = ProjectImage
     extra = 1
-    fields = ['image', 'caption', 'order']
+    fields = ['image']
 
 
 class ProjectFeatureInline(admin.TabularInline):
@@ -17,60 +17,48 @@ class ProjectFeatureInline(admin.TabularInline):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['title', 'category', 'standard_price', 'custom_price', 'is_featured', 'is_published', 'order', 'views_count', 'sales_count', 'created_at']
+    list_display = ['title', 'category', 'standard_price', 'custom_price', 'is_featured', 'is_published', 'order', 'created_at']
     list_filter = ['is_published', 'is_featured', 'category', 'tech_stack', 'created_at']
-    search_fields = ['title', 'short_description', 'full_description', 'slug']
+    search_fields = ['title', 'full_description', 'slug']
     prepopulated_fields = {'slug': ('title',)}
     list_editable = ['is_featured', 'is_published', 'order']
     date_hierarchy = 'created_at'
-    inlines = [ProjectScreenshotInline, ProjectFeatureInline]
+    inlines = [ProjectImageInline, ProjectFeatureInline]
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'slug', 'category', 'short_description', 'full_description', 'thumbnail')
+            'fields': ('title', 'slug', 'category', 'full_description', 'thumbnail')
         }),
         ('Pricing & Links', {
-            'fields': ('standard_price', 'custom_price', 'gumroad_standard_url', 'demo_url', 'documentation_url')
+            'fields': ('standard_price', 'custom_price', 'gumroad_standard_url', 'demo_url')
         }),
         ('Tech & Classification', {
             'fields': ('tech_stack', 'is_featured', 'is_published', 'order')
-        }),
-        ('SEO', {
-            'fields': ('page_title', 'meta_description', 'meta_keywords'),
-            'classes': ('collapse',)
-        }),
-        ('Statistics', {
-            'fields': ('views_count', 'sales_count'),
-            'classes': ('collapse',)
         }),
     )
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'phone', 'inquiry_type', 'project', 'status', 'created_at', 'updated_at']
-    list_filter = ['status', 'inquiry_type', 'created_at']
-    search_fields = ['name', 'email', 'phone', 'project_details', 'message_text', 'admin_notes']
+    list_display = ['name', 'email', 'phone', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['name', 'email', 'phone', 'project_details']
     date_hierarchy = 'created_at'
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at']
     fieldsets = (
         ('Contact Info', {
             'fields': ('name', 'email', 'phone')
         }),
         ('Order Details', {
-            'fields': ('inquiry_type', 'project', 'project_details', 'expected_budget', 'delivery_date', 'subject', 'message_text')
+            'fields': ('project_details', 'expected_budget', 'delivery_date', 'is_aware_min_budget')
         }),
         ('Management', {
-            'fields': ('status', 'admin_notes')
+            'fields': ('status',)
         }),
         ('Dates', {
-            'fields': ('created_at', 'updated_at'),
+            'fields': ('created_at',),
             'classes': ('collapse',)
         }),
     )
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('project')
 
 
 @admin.register(Category)

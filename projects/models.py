@@ -43,7 +43,6 @@ class SiteConfig(SingletonModel):
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name="Name")
     slug = models.SlugField(unique=True, blank=True, verbose_name="Slug")
-    description = models.TextField(blank=True, verbose_name="Description")
     order = models.PositiveIntegerField(default=0, verbose_name="Order")
 
     class Meta:
@@ -82,11 +81,9 @@ class Project(models.Model):
     title = models.CharField(max_length=200, verbose_name="Title")
     slug = models.SlugField(unique=True, blank=True, verbose_name="Slug")
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='projects', verbose_name="Category")
-    short_description = models.CharField(max_length=300, verbose_name="Short Description")
     full_description = models.TextField(verbose_name="Full Description")
     thumbnail = models.ImageField(upload_to='projects/thumbnails/', verbose_name="Thumbnail")
     demo_url = models.URLField(blank=True, verbose_name="Demo URL")
-    documentation_url = models.URLField(blank=True, verbose_name="Documentation URL")
     gumroad_standard_url = models.URLField(blank=True, help_text="Gumroad purchase link for standard version", verbose_name="Gumroad URL")
     standard_price = models.DecimalField(max_digits=8, decimal_places=2, default=1500.00, verbose_name="Standard Price (EGP)")
     custom_price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, verbose_name="Custom Price (EGP)")
@@ -94,14 +91,7 @@ class Project(models.Model):
     is_featured = models.BooleanField(default=False, verbose_name="Featured?")
     is_published = models.BooleanField(default=True, verbose_name="Published?")
     order = models.PositiveIntegerField(default=0, verbose_name="Order")
-    views_count = models.PositiveIntegerField(default=0, verbose_name="Views Count")
-    sales_count = models.PositiveIntegerField(default=0, verbose_name="Sales Count")
-    
-    # SEO fields
-    page_title = models.CharField(max_length=200, blank=True, help_text="Page title override", verbose_name="Page Title")
-    meta_description = models.CharField(max_length=300, blank=True, verbose_name="Meta Description")
-    meta_keywords = models.CharField(max_length=300, blank=True, verbose_name="Meta Keywords")
-    
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
@@ -118,26 +108,17 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
-    def get_page_title(self):
-        return self.page_title or f"{self.title} | DevGrade"
 
-    def get_meta_description(self):
-        return self.meta_description or self.short_description
-
-
-class ProjectScreenshot(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='screenshots', verbose_name="Project")
-    image = models.ImageField(upload_to='projects/screenshots/', verbose_name="Image")
-    caption = models.CharField(max_length=200, blank=True, verbose_name="Caption")
-    order = models.PositiveIntegerField(default=0, verbose_name="Order")
+class ProjectImage(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images', verbose_name="Project")
+    image = models.ImageField(upload_to='projects/images/', verbose_name="Image")
 
     class Meta:
-        verbose_name = "Screenshot"
-        verbose_name_plural = "Screenshots"
-        ordering = ['order']
+        verbose_name = "Project Image"
+        verbose_name_plural = "Project Images"
 
     def __str__(self):
-        return f"Screenshot for {self.project.title}"
+        return f"Image for {self.project.title}"
 
 
 class ProjectFeature(models.Model):
@@ -156,38 +137,22 @@ class ProjectFeature(models.Model):
 
 class Message(models.Model):
     STATUS_CHOICES = [
-        ('new', 'New'),
+        ('unread', 'Unread'),
+        ('opened', 'Opened'),
+        ('refused', 'Refused'),
+        ('accepted', 'Accepted'),
         ('contacted', 'Contacted'),
-        ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
     ]
-    
-    INQUIRY_TYPE_CHOICES = [
-        ('custom_order', 'Custom Order'),
-        ('general_inquiry', 'General Inquiry'),
-    ]
-    
-    inquiry_type = models.CharField(max_length=20, choices=INQUIRY_TYPE_CHOICES, default='custom_order', verbose_name="Inquiry Type")
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='messages', verbose_name="Project (Optional)")
+
     name = models.CharField(max_length=200, verbose_name="Name")
     email = models.EmailField(verbose_name="Email")
     phone = models.CharField(max_length=50, blank=True, verbose_name="Phone / WhatsApp")
-    
-    # For custom orders
-    project_details = models.TextField(help_text="Describe in detail what you need", verbose_name="Project Details")
-    expected_budget = models.CharField(max_length=100, blank=True, help_text="e.g. 2000-3000 EGP", verbose_name="Expected Budget")
+    project_details = models.TextField(verbose_name="Project Details")
+    expected_budget = models.CharField(max_length=100, blank=True, verbose_name="Expected Budget")
     delivery_date = models.DateField(null=True, blank=True, verbose_name="Required Delivery Date")
-    
-    # For general inquiries
-    subject = models.CharField(max_length=200, blank=True, verbose_name="Subject")
-    message_text = models.TextField(blank=True, verbose_name="Message")
-    
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new', verbose_name="Status")
-    admin_notes = models.TextField(blank=True, help_text="Private notes, not visible to the client", verbose_name="Admin Notes")
-    
+    is_aware_min_budget = models.BooleanField(default=False, verbose_name="أنا على وعي أن المشروع لن يكلف أقل من 5000 جنيه مصري")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unread', verbose_name="Status")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
     class Meta:
         verbose_name = "Message / Order"
@@ -195,9 +160,7 @@ class Message(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.name} - {self.get_inquiry_type_display()}"
+        return f"{self.name} - {self.get_status_display()}"
 
     def get_summary(self):
-        if self.inquiry_type == 'custom_order':
-            return self.project_details[:100] + "..." if len(self.project_details) > 100 else self.project_details
-        return self.message_text[:100] + "..." if len(self.message_text) > 100 else self.message_text
+        return self.project_details[:100] + "..." if len(self.project_details) > 100 else self.project_details

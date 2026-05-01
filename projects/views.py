@@ -7,8 +7,27 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q, Sum
 from django.core.paginator import Paginator
-from .models import Project, Category, TechStack, Message, SiteConfig
-from .forms import MessageForm, ContactForm, ProjectForm
+from functools import wraps
+from .models import Project, Category, TechStack, Message, SiteConfig, ProjectImage
+from .forms import MessageForm, ProjectForm
+
+
+def handle_errors(view_func):
+    """Decorator to catch unexpected errors and show friendly messages or error pages."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        try:
+            return view_func(request, *args, **kwargs)
+        except Exception as e:
+            # Log the error in production (you can add logging here)
+            if request.headers.get('HX-Request'):
+                return render(request, 'partials/_alert.html', {
+                    'message': 'حصلت مشكلة فنية. جرب تاني بعد شوية.',
+                    'type': 'error',
+                })
+            messages.error(request, 'حصلت مشكلة فنية. جرب تاني بعد شوية.')
+            return redirect('home')
+    return wrapper
 
 
 def site_config(request):
@@ -16,11 +35,12 @@ def site_config(request):
     return {'site_config': SiteConfig.load()}
 
 
+@handle_errors
 def home(request):
     featured = Project.objects.filter(is_featured=True, is_published=True).select_related('category').prefetch_related('tech_stack')[:3]
     latest = Project.objects.filter(is_published=True).select_related('category').prefetch_related('tech_stack').order_by('-created_at')[:6]
     total_projects = Project.objects.filter(is_published=True).count()
-    
+
     context = {
         'featured': featured,
         'latest': latest,
@@ -33,31 +53,31 @@ def home(request):
     return render(request, 'projects/home.html', context)
 
 
+@handle_errors
 def project_list(request):
     projects = Project.objects.filter(is_published=True).select_related('category').prefetch_related('tech_stack')
     categories = Category.objects.annotate(project_count=Count('projects', filter=Q(projects__is_published=True)))
-    
+
     category_slug = request.GET.get('category')
     active_category = None
     if category_slug:
         active_category = get_object_or_404(Category, slug=category_slug)
         projects = projects.filter(category=active_category)
-    
+
     # Search
     query = request.GET.get('q')
     if query:
         projects = projects.filter(
-            Q(title__icontains=query) | 
-            Q(short_description__icontains=query) |
+            Q(title__icontains=query) |
             Q(full_description__icontains=query)
         )
-    
+
     # HTMX partial render
     if request.headers.get('HX-Request'):
         return render(request, 'partials/_project_grid.html', {
             'projects': projects,
         })
-    
+
     context = {
         'projects': projects,
         'categories': categories,
@@ -70,37 +90,33 @@ def project_list(request):
     return render(request, 'projects/project_list.html', context)
 
 
+@handle_errors
 def project_detail(request, slug):
-    project = get_object_or_404(Project.objects.select_related('category').prefetch_related('tech_stack', 'screenshots', 'features'), slug=slug, is_published=True)
-    
-    # Increment views
-    project.views_count += 1
-    project.save(update_fields=['views_count'])
-    
+    project = get_object_or_404(Project.objects.select_related('category').prefetch_related('tech_stack', 'images', 'features'), slug=slug, is_published=True)
+
     related = Project.objects.filter(category=project.category, is_published=True).exclude(id=project.id).select_related('category').prefetch_related('tech_stack')[:3]
-    
-    form = MessageForm(project=project)
-    
+
+    form = MessageForm()
+
     context = {
         'project': project,
         'related': related,
         'form': form,
-        'page_title': project.get_page_title(),
-        'meta_description': project.get_meta_description(),
-        'meta_keywords': project.meta_keywords,
+        'page_title': f"{project.title} | DevGrade",
         'canonical_url': request.build_absolute_uri(),
     }
     return render(request, 'projects/project_detail.html', context)
 
 
+@handle_errors
 def submit_message(request, slug=None):
     """HTMX endpoint for submitting custom order or general inquiry"""
     project = None
     if slug:
         project = get_object_or_404(Project, slug=slug, is_published=True)
-    
+
     if request.method == 'POST':
-        form = MessageForm(request.POST, project=project)
+        form = MessageForm(request.POST)
         if form.is_valid():
             form.save()
             if request.headers.get('HX-Request'):
@@ -119,13 +135,14 @@ def submit_message(request, slug=None):
                     'project': project,
                 })
     else:
-        form = MessageForm(project=project)
-    
+        form = MessageForm()
+
     if project:
         return redirect('project_detail', slug=project.slug)
     return redirect('contact')
 
 
+@handle_errors
 def about(request):
     total_projects = Project.objects.filter(is_published=True).count()
     context = {
@@ -137,6 +154,7 @@ def about(request):
     return render(request, 'pages/about.html', context)
 
 
+@handle_errors
 def faq(request):
     context = {
         'page_title': 'الأسئلة الشائعة | DevGrade',
@@ -146,16 +164,17 @@ def faq(request):
     return render(request, 'pages/faq.html', context)
 
 
+@handle_errors
 def contact(request):
     if request.method == 'POST':
-        form = ContactForm(request.POST)
+        form = MessageForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, 'شكراً لتواصلك! هرد عليك في أقرب وقت.')
             return redirect('contact')
     else:
-        form = ContactForm()
-    
+        form = MessageForm()
+
     context = {
         'form': form,
         'page_title': 'تواصل معايا | DevGrade',
@@ -177,23 +196,22 @@ def admin_login(request):
             login(request, user)
             return redirect('dashboard')
         else:
-            messages.error(request, 'Invalid credentials or you do not have admin access.')
+            messages.error(request, 'البيانات غلط أو إنت مش Admin. لو نسيت الباسورد، روح لـ Django Admin.')
     return render(request, 'dashboard/login.html', {'page_title': 'Admin Login | DevGrade'})
 
 
 @staff_member_required(login_url='admin_login')
 def dashboard(request):
     """Site owner dashboard"""
-    new_messages = Message.objects.filter(status='new').count()
+    new_messages = Message.objects.filter(status='unread').count()
     total_messages = Message.objects.count()
     total_projects = Project.objects.filter(is_published=True).count()
-    total_views = Project.objects.aggregate(total=Sum('views_count'))['total'] or 0
-    
+
     status_filter = request.GET.get('status', '')
-    messages_qs = Message.objects.select_related('project').all()
+    messages_qs = Message.objects.all()
     if status_filter:
         messages_qs = messages_qs.filter(status=status_filter)
-    
+
     search = request.GET.get('search', '')
     if search:
         messages_qs = messages_qs.filter(
@@ -201,17 +219,16 @@ def dashboard(request):
             Q(email__icontains=search) |
             Q(phone__icontains=search)
         )
-    
+
     paginator = Paginator(messages_qs, 25)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         'stats': {
             'new_messages': new_messages,
             'total_messages': total_messages,
             'total_projects': total_projects,
-            'total_views': total_views,
         },
         'messages_list': page_obj,
         'status_filter': status_filter,
@@ -231,25 +248,11 @@ def update_message_status(request, message_id):
     if new_status in [s[0] for s in Message.STATUS_CHOICES]:
         message_obj.status = new_status
         message_obj.save(update_fields=['status'])
-    
+
     if request.headers.get('HX-Request'):
         return render(request, 'partials/_message_row.html', {
             'msg': message_obj,
         })
-    return redirect('dashboard')
-
-
-@staff_member_required(login_url='admin_login')
-@require_POST
-def update_admin_notes(request, message_id):
-    """HTMX endpoint to update admin notes"""
-    message_obj = get_object_or_404(Message, id=message_id)
-    notes = request.POST.get('admin_notes', '')
-    message_obj.admin_notes = notes
-    message_obj.save(update_fields=['admin_notes', 'updated_at'])
-    
-    if request.headers.get('HX-Request'):
-        return HttpResponse(notes)
     return redirect('dashboard')
 
 
@@ -269,7 +272,7 @@ def dashboard_projects(request):
     query = request.GET.get('q', '')
     if query:
         projects_qs = projects_qs.filter(
-            Q(title__icontains=query) | Q(short_description__icontains=query)
+            Q(title__icontains=query) | Q(full_description__icontains=query)
         )
     status_filter = request.GET.get('status', '')
     if status_filter == 'published':
@@ -297,9 +300,9 @@ def dashboard_project_add(request):
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
             project = form.save()
-            # Handle screenshots
-            for f in request.FILES.getlist('screenshots'):
-                project.screenshots.create(image=f)
+            # Handle images
+            for f in request.FILES.getlist('images'):
+                project.images.create(image=f)
             # Handle features
             features_text = request.POST.get('features', '').strip()
             if features_text:
@@ -327,9 +330,9 @@ def dashboard_project_edit(request, project_id):
         form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             project = form.save()
-            # Handle new screenshots
-            for f in request.FILES.getlist('screenshots'):
-                project.screenshots.create(image=f)
+            # Handle new images
+            for f in request.FILES.getlist('images'):
+                project.images.create(image=f)
             # Handle new features
             features_text = request.POST.get('features', '').strip()
             if features_text:
@@ -362,11 +365,11 @@ def dashboard_project_delete(request, project_id):
 
 @staff_member_required(login_url='admin_login')
 @require_POST
-def dashboard_screenshot_delete(request, project_id, screenshot_id):
+def dashboard_image_delete(request, project_id, image_id):
     project = get_object_or_404(Project, id=project_id)
-    screenshot = get_object_or_404(project.screenshots, id=screenshot_id)
-    screenshot.delete()
-    messages.success(request, 'Screenshot deleted!')
+    image = get_object_or_404(project.images, id=image_id)
+    image.delete()
+    messages.success(request, 'Image deleted!')
     return redirect('dashboard_project_edit', project_id=project.id)
 
 
@@ -378,3 +381,16 @@ def dashboard_feature_delete(request, project_id, feature_id):
     feature.delete()
     messages.success(request, 'Feature deleted!')
     return redirect('dashboard_project_edit', project_id=project.id)
+
+
+# Custom error handlers
+def custom_404(request, exception=None):
+    return render(request, '404.html', status=404)
+
+
+def custom_500(request):
+    return render(request, '500.html', status=500)
+
+
+def custom_403(request, exception=None):
+    return render(request, '403.html', status=403)
