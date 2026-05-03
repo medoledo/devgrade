@@ -150,7 +150,7 @@ class Message(models.Model):
     project_details = models.TextField(verbose_name="Project Details")
     expected_budget = models.CharField(max_length=100, blank=True, verbose_name="Expected Budget")
     delivery_date = models.DateField(null=True, blank=True, verbose_name="Required Delivery Date")
-    is_aware_min_budget = models.BooleanField(default=False, verbose_name="أنا على وعي أن المشروع لن يكلف أقل من 5000 جنيه مصري")
+    is_aware_min_budget = models.BooleanField(default=False, verbose_name="أنا على وعي أن المشروع لن يكلف أقل من 3000 جنيه مصري")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unread', verbose_name="Status")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
 
