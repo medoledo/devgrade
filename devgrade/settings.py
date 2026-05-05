@@ -9,15 +9,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable is not set!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
-
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if os.getenv('CSRF_TRUSTED_ORIGINS') else []
+if DEBUG:
+    # Development defaults
+    if not SECRET_KEY:
+        SECRET_KEY = 'django-insecure-devgrade-local-dev-only'
+    ALLOWED_HOSTS = ['*']
+    CSRF_TRUSTED_ORIGINS = []
+else:
+    # Production requirements
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is required in production!")
+    allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
+    if not allowed_hosts:
+        raise ValueError("ALLOWED_HOSTS environment variable is required in production!")
+    ALLOWED_HOSTS = [h.strip() for h in allowed_hosts.split(',') if h.strip()]
+    csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in csrf_origins.split(',') if o.strip()]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -63,17 +74,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'devgrade.wsgi.application'
 
-# PostgreSQL Database Configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'devgrade'),
-        'USER': os.getenv('DB_USER', 'devgrade_user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+# Database
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+    # Validate production DB settings
+    for key in ('DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST'):
+        if not os.getenv(key):
+            raise ValueError(f"{key} environment variable is required in production!")
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Cairo'
